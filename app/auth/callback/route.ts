@@ -11,14 +11,46 @@ export async function GET(request: Request) {
   const redirectTo = requestUrl.searchParams.get("redirect_to")?.toString();
 
   if (code) {
-    const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      // 确保会话已创建且有效
+      if (error) {
+        console.error("Error exchanging code for session:", error);
+        return NextResponse.redirect(`${origin}/sign-in?error=auth_exchange_failed`);
+      }
+      
+      // 验证会话是否有效
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        console.error("No valid session after code exchange:", sessionError);
+        return NextResponse.redirect(`${origin}/sign-in?error=no_valid_session`);
+      }
+      
+      // 获取用户信息，确保用户数据已加载
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        console.error("Could not retrieve user data:", userError);
+        return NextResponse.redirect(`${origin}/sign-in?error=user_fetch_failed`);
+      }
+      
+      // 等待一小段时间，以确保会话状态完全同步
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // 成功处理，重定向到指定的页面或dashboard
+      if (redirectTo) {
+        return NextResponse.redirect(`${origin}${redirectTo}`);
+      }
+      
+      // URL to redirect to after sign up process completes
+      return NextResponse.redirect(`${origin}/dashboard`);
+    } catch (error) {
+      console.error("Callback processing error:", error);
+      return NextResponse.redirect(`${origin}/sign-in?error=callback_processing_error`);
+    }
   }
 
-  if (redirectTo) {
-    return NextResponse.redirect(`${origin}${redirectTo}`);
-  }
-
-  // URL to redirect to after sign up process completes
-  return NextResponse.redirect(`${origin}/dashboard`);
+  // 没有code参数，这可能是一个错误的请求
+  return NextResponse.redirect(`${origin}/sign-in?error=missing_auth_code`);
 }
