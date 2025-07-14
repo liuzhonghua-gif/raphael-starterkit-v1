@@ -19,20 +19,14 @@ export async function GET(request: Request) {
     // Use service role client for database operations
     const serviceClient = createServiceRoleClient();
 
-    // Get the customer record for this user - don't use .single()
-    const { data: customers, error: customerError } = await serviceClient
+    // Get the customer record for this user
+    const { data: customer, error: customerError } = await serviceClient
       .from("customers")
       .select("creem_customer_id")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .single();
 
-    if (customerError) {
-      return new NextResponse("Error fetching customer data", { status: 500 });
-    }
-
-    // Check if any customer records exist
-    const customer = customers && customers.length > 0 ? customers[0] : null;
-    
-    if (!customer || !customer.creem_customer_id) {
+    if (customerError || !customer) {
       return new NextResponse("No subscription found", { status: 404 });
     }
 

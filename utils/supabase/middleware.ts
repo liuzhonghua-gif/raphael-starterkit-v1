@@ -35,10 +35,6 @@ export const updateSession = async (request: NextRequest) => {
       }
     );
 
-    // 等待会话刷新完成
-    const { data, error } = await supabase.auth.getSession();
-    const isLoggedIn = !error && data.session !== null;
-
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
@@ -47,15 +43,10 @@ export const updateSession = async (request: NextRequest) => {
     if (request.nextUrl.pathname.startsWith("/dashboard") && user.error) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
-
-    // 检查URL中是否含有auth回调相关参数
-    const url = new URL(request.url);
-    const isAuthCallback = request.nextUrl.pathname === "/auth/callback";
-
-    // 如果是从认证回调页面来的，确保等待状态完全更新
-    if (isAuthCallback) {
-      // 已在auth/callback/route.ts中处理
-    }
+    // Redirect to dashboard all the time if user is logged in
+    // if (request.nextUrl.pathname === "/" && !user.error) {
+    //   return NextResponse.redirect(new URL("/dashboard", request.url));
+    // }
 
     return response;
   } catch (e) {

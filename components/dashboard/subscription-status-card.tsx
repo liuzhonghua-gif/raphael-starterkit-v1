@@ -23,30 +23,18 @@ type StatusConfigs = {
   [key in SubscriptionState]: StatusConfig;
 };
 
-function formatDate(date: string | undefined) {
-  if (!date) return 'N/A';
+function formatDate(date: string) {
   return new Date(date).toLocaleDateString();
 }
 
-function isFutureDate(date: string | undefined) {
-  if (!date) return false;
+function isFutureDate(date: string) {
   return new Date(date) > new Date();
 }
 
 function getStatusConfig(
-  status: string | undefined,
-  current_period_end: string | undefined
+  status: string,
+  current_period_end: string
 ): StatusConfig {
-  // 如果状态或日期无效，返回默认状态
-  if (!status || !current_period_end) {
-    return {
-      color: "text-muted-foreground",
-      icon: AlertCircle,
-      message: "No active plan",
-      iconColor: "text-muted-foreground",
-    };
-  }
-
   const inGracePeriod = isFutureDate(current_period_end);
 
   const configs: StatusConfigs = {
@@ -114,8 +102,8 @@ function getStatusConfig(
 
 type SubscriptionStatusCardProps = {
   subscription?: {
-    status?: string;
-    current_period_end?: string;
+    status: string;
+    current_period_end: string;
   } | null;
 };
 
@@ -130,7 +118,7 @@ export function SubscriptionStatusCard({
         </div>
         <div>
           <p className="text-sm text-muted-foreground">Subscription Status</p>
-          {subscription && subscription.status ? (
+          {subscription && (
             <h3
               className={`text-2xl font-bold capitalize mt-1 ${
                 getStatusConfig(
@@ -141,14 +129,15 @@ export function SubscriptionStatusCard({
             >
               {subscription.status}
             </h3>
-          ) : (
+          )}
+          {!subscription && (
             <h3 className="text-2xl font-bold mt-1 text-muted-foreground">
               No Active Plan
             </h3>
           )}
         </div>
       </div>
-      {subscription && subscription.status && subscription.current_period_end ? (
+      {subscription && (
         <div className="mt-4 flex items-center text-sm gap-2">
           {(() => {
             const config = getStatusConfig(
@@ -164,7 +153,7 @@ export function SubscriptionStatusCard({
             );
           })()}
         </div>
-      ) : null}
+      )}
       <div className="mt-4">
         <SubscriptionPortalDialog />
       </div>

@@ -9,12 +9,9 @@ type CreditsBalanceCardProps = {
 };
 
 export function CreditsBalanceCard({
-  credits = 0,
-  recentHistory = [],
+  credits,
+  recentHistory,
 }: CreditsBalanceCardProps) {
-  // 确保recentHistory始终是数组
-  const safeHistory = Array.isArray(recentHistory) ? recentHistory : [];
-  
   return (
     <div className="rounded-xl border bg-card p-6">
       <div className="flex items-center gap-4">
@@ -29,30 +26,24 @@ export function CreditsBalanceCard({
       <div className="mt-4 space-y-2">
         <p className="text-sm text-muted-foreground">Recent Activity</p>
         <div className="space-y-1">
-          {safeHistory.length > 0 ? (
-            safeHistory.map((history, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between text-sm"
+          {recentHistory.map((history, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between text-sm"
+            >
+              <span
+                className={
+                  history.type === "add" ? "text-primary" : "text-destructive"
+                }
               >
-                <span
-                  className={
-                    history.type === "add" ? "text-primary" : "text-destructive"
-                  }
-                >
-                  {history.type === "add" ? "+" : "-"}
-                  {history.amount}
-                </span>
-                <span className="text-muted-foreground">
-                  {new Date(history.created_at).toLocaleDateString()}
-                </span>
-              </div>
-            ))
-          ) : (
-            <div className="text-sm text-muted-foreground py-1">
-              No recent activity
+                {history.type === "add" ? "+" : "-"}
+                {history.amount}
+              </span>
+              <span className="text-muted-foreground">
+                {new Date(history.created_at).toLocaleDateString()}
+              </span>
             </div>
-          )}
+          ))}
         </div>
       </div>
     </div>

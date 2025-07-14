@@ -33,7 +33,6 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
     }
 
     if (data.url) {
-      // 确保状态更新后再重定向
       return redirect(data.url);
     }
   };

@@ -20,7 +20,7 @@ export const SUBSCRIPTION_TIERS: ProductTier[] = [
   },
   {
     name: "Business",
-    id: "prod_3TiG7jKl9pBhJWfTBc9jtS",
+    id: "tier-pro",
     productId: "prod_3KvkFFEiGGjnF4bgHBjl18", // $29 monthly subscription
     priceMonthly: "$29",
     description: "Ideal for growing businesses and development teams.",
