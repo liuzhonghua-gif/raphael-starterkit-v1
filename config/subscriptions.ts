@@ -4,7 +4,7 @@ export const SUBSCRIPTION_TIERS: ProductTier[] = [
   {
     name: "Starter",
     id: "tier-hobby",
-    productId: "prod_63JTQmsUcQrlZe94IL76fI", // $11 monthly subscription
+    productId: "prod_63JTQmsUcQrlZe94IL76fI", // $11 monthly subscription   prod_3TiG7jKl9pBhJWfTBc9jtS
     priceMonthly: "$11",
     description: "Perfect for individual developers and small projects.",
     features: [
@@ -58,7 +58,7 @@ export const CREDITS_TIERS: ProductTier[] = [
   {
     name: "Basic Package",
     id: "tier-3-credits",
-    productId: "prod_MqcjVo0Bpx0rbYmHVlrh2", // $9 one-time purchase
+    productId: "prod_3TiG7jKl9pBhJWfTBc9jtS", // $9 one-time purchase
     priceMonthly: "$9",
     description: "3 credits for testing and small-scale projects.",
     creditAmount: 3,
