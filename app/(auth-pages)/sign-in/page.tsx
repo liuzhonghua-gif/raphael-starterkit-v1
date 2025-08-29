@@ -16,8 +16,9 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
     "use server";
     const supabase = await createClient();
     
-    // 使用环境变量中的站点URL，如果没有则使用默认值
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // 基于当前请求的来源构造回调地址，避免本地与线上不一致
+    const hdrs = await import("next/headers");
+    const origin = (await hdrs.headers()).get("origin") || "http://localhost:3000";
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
