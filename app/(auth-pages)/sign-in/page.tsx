@@ -15,7 +15,9 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
   const signInWithGoogle = async () => {
     "use server";
     const supabase = await createClient();
-    const origin = process.env.NEXT_PUBLIC_SITE_URL;
+    
+    // 使用环境变量中的站点URL，如果没有则使用默认值
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -29,6 +31,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
     });
 
     if (error) {
+      console.error("Google OAuth error:", error);
       return encodedRedirect("error", "/sign-in", error.message);
     }
 
