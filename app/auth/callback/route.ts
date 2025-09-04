@@ -2,23 +2,34 @@ import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  // The `/auth/callback` route is required for the server-side auth flow implemented
-  // by the SSR package. It exchanges an auth code for the user's session.
-  // https://supabase.com/docs/guides/auth/server-side/nextjs
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const origin = requestUrl.origin;
-  const redirectTo = requestUrl.searchParams.get("redirect_to")?.toString();
+  try {
+    const requestUrl = new URL(request.url);
+    const code = requestUrl.searchParams.get("code");
 
-  if (code) {
-    const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    // 使用当前请求的 origin，保证与 Google/Supabase 配置一致
+    const origin = requestUrl.origin;
+    const redirectTo = requestUrl.searchParams.get("redirect_to")?.toString();
+
+    if (code) {
+      const supabase = await createClient();
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error) {
+        console.error("Auth callback error:", error);
+        return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent(error.message)}`);
+      }
+    }
+
+    if (redirectTo) {
+      return NextResponse.redirect(`${origin}${redirectTo}`);
+    }
+
+    return NextResponse.redirect(`${origin}/dashboard`);
+  } catch (error) {
+    try {
+      const origin = new URL(request.url).origin;
+      return NextResponse.redirect(`${origin}/sign-in?error=Authentication failed`);
+    } catch {
+      return NextResponse.redirect(`http://localhost:3000/sign-in?error=Authentication failed`);
+    }
   }
-
-  if (redirectTo) {
-    return NextResponse.redirect(`${origin}${redirectTo}`);
-  }
-
-  // URL to redirect to after sign up process completes
-  return NextResponse.redirect(`${origin}/dashboard`);
 }

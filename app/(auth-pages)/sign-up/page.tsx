@@ -17,7 +17,10 @@ export default async function SignUp(props: {
   const signUpWithGoogle = async () => {
     "use server";
     const supabase = await createClient();
-    const origin = process.env.NEXT_PUBLIC_SITE_URL;
+    
+    // 基于当前请求的来源构造回调地址，避免本地与线上不一致
+    const hdrs = await import("next/headers");
+    const origin = (await hdrs.headers()).get("origin") || "http://localhost:3000";
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -31,6 +34,7 @@ export default async function SignUp(props: {
     });
 
     if (error) {
+      console.error("Google OAuth error:", error);
       return encodedRedirect("error", "/sign-up", error.message);
     }
 
